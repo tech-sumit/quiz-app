@@ -39,4 +39,4 @@ The server will start running on `http://localhost:8080`.
 To run the tests, use the following command:
 
 ```
-go test ./
+go test ./...

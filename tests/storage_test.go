@@ -157,3 +157,39 @@ func TestMemoryStorage_SubmitAnswerQuestionNotFound(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, "question not found", err.Error())
 }
+
+func TestMemoryStorage_GetQuizNotFound(t *testing.T) {
+	store := storage.NewMemoryStorage()
+
+	// Attempt to get a quiz that doesn't exist
+	_, err := store.GetQuiz("nonexistent")
+	assert.Error(t, err)
+	assert.Equal(t, "quiz not found", err.Error())
+}
+
+func TestMemoryStorage_SubmitAnswerInvalidCorrectOption(t *testing.T) {
+	store := storage.NewMemoryStorage()
+
+	// Create a quiz with an invalid correct option
+	quiz := &models.Quiz{
+		ID:    "1",
+		Title: "Test Quiz",
+		Questions: []models.Question{
+			{
+				ID:            "q1",
+				Text:          "Invalid question",
+				Options:       []string{"A", "B"},
+				CorrectOption: 5, // This is invalid as it's out of range
+				Marks:         1,
+			},
+		},
+	}
+
+	err := store.CreateQuiz(quiz)
+	assert.NoError(t, err)
+
+	// Attempt to submit an answer for this question
+	_, _, err = store.SubmitAnswer("1", "user1", &models.Answer{QuestionID: "q1", SelectedOption: 0})
+	assert.Error(t, err)
+	assert.Equal(t, "invalid correct option", err.Error())
+}
